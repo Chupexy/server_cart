@@ -89,5 +89,29 @@ router.post('login', async(req, res) =>{
 
 })
 
+//endpoint to logout
+router.post('/logout', async(req, res) =>{
+    const {token} = req.body
+
+    if(!token)
+        return res.status(400).send({status:'error', msg:'All fields must be filled'})
+
+    try {
+        // Token verification
+        const user = jwt.compare(token , process.env.JWT_SECRET)
+        if(user)
+        return res.status(200).send({status:'ok', msg:'Logout successful'})
+
+    } catch (e){
+        if(e.name === 'JsonWebTokenError'){
+            console.log(e)
+            res.status(401).send({status:'error', msg:'Token verification failed', error: e})
+        }
+        return res.status(500).send({status:'error', msg:'An error occured'})
+    }
+    
+
+})
+
 
 module.exports = router;

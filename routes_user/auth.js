@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs")
 
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const Cart = require('../models/cart')
 
 
 
@@ -43,6 +44,15 @@ router.post("signup", async(req, res) =>{
         user.orders = []
 
         await user.save()
+
+
+         // create cart document
+         const cart = new Cart();
+         cart.user_id = user._id;
+         cart.order_items = [];
+         cart.timestamp = timestamp;
+
+         await cart.save();
 
         const token = jwt.sign(
             {
