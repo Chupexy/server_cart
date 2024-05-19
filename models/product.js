@@ -17,7 +17,7 @@ const productSchema = new Schema({
     vendor_img: String,
     vendor_id: String
 },{
-
+collation : 'products'
 })
 
 const model = mongoose.model('Products', productSchema)

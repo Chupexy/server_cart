@@ -17,7 +17,7 @@ const cartSchema = new Schema({
     timestamp: Number
     
 },{
-
+collation : 'carts'
 })
 
 

@@ -11,7 +11,7 @@ const adminSchema = new Schema({
     timestamp: Number
 
 },{
-
+collation : 'admins'
 });
 
 const model = mongoose.model('Admin', adminSchema);

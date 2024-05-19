@@ -67,12 +67,12 @@ router.post('/edit_product', async (req, res) => {
             return res.status(400).send({status: 'error', msg:'Product not found'})
 
         product = Product.findByIdAndUpdate({_id: product_id}, {
-            product_name: product_name,
-            price: price,
-            description: description,
-            brand: brand,
-            product_quantity: product_quantity,
-            category: category
+            product_name: product_name || product.product_name,
+            price: price || product.price, 
+            description: description || product.description,
+            brand: brand || product.brand,
+            product_quantity: product_quantity || product.product_quantity,
+            category: category || product.category
             }, {new: true}).lean()
 
             res.status(200).send({status: 'ok', msg:'Product updated successfully', product})
