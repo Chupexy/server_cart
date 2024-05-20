@@ -18,9 +18,13 @@ addresses: [
 ],
 card_details: String,
 saved_items: [String],
-orders : [String]
+orders : [String],
+last_login: Number,
+last_logout: Number,
+is_online: {type: Boolean, default: false},
+is_deleted: {type: Boolean, default: false}
 },{
-
+collation: 'users'
 })
 
 const model= mongoose.model('Users', userSchema);

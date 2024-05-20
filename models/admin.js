@@ -8,7 +8,11 @@ const adminSchema = new Schema({
     role: String,
     img_id: String,
     img_url: String,
-    timestamp: Number
+    timestamp: Number,
+    last_login: Number,
+    last_logout: Number,
+    is_online: {type: Boolean, default: false},
+    is_deleted: {type: Boolean, default: false}
 
 },{
 collation : 'admins'

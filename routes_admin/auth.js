@@ -65,7 +65,7 @@ router.post('login', async(req, res) =>{
     
     try {
         // check if admin exists
-        const admin = await Admin.findOne({email}).lean()
+        const admin = await Admin.findOneAndUpdate({email}, {is_online: true, last_login: Date.now()}).lean()
 
         if(!admin)
             return res.status(400).send({status: 'error', msg: 'No user with this email'})
@@ -98,8 +98,11 @@ router.post('/logout', async(req, res) =>{
 
     try {
         // Token verification
-        const user = jwt.compare(token , process.env.JWT_SECRET)
-        if(user)
+         const admin =jwt.verify(token , process.env.JWT_SECRET)
+
+        //update document
+         await Admin.findOneAndUpdate({_id: admin._id}, {is_online: false, last_logout: Date.now()}).lean()
+
         return res.status(200).send({status:'ok', msg:'Logout successful'})
 
     } catch (e){
@@ -113,5 +116,30 @@ router.post('/logout', async(req, res) =>{
 
 })
 
+//endpoint to delete account
+router.post('delete_admin', async(req, res)=>{
+    const{token, admin_id} = req.body
+
+    if(!token || admin_id)
+        return res.status(400).send({status:'error', msg:'All fields must be filled'})
+
+    try {
+        //verify token
+         jwt.verify(token, process.env.JWT_SECRET)
+
+        //update admin document
+        await Admin.findOneAndUpdate({_id: admin_id}, {is_deleted: true}).lean()
+
+        res.status(200).send({status:'ok', msg:'Successfully Deleted'})
+        
+    } catch (e) {
+        if(e.name === 'JsonWebTokenError'){
+            console.log(e)
+            res.status(401).send({status:'error', msg:'Token verification failed', error: e})
+        }
+        return res.status(500).send({status:'error', msg:'An error occured'})
+        
+    }
+})
 
 module.exports = router;

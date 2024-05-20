@@ -67,7 +67,7 @@ router.post("signup", async(req, res) =>{
 
     }catch(e){
         return res.status(500).send({status: "error",msg:"some error occured", error: e.message})
-    }
+    } 
 })
 
 // Endpoint to login
@@ -83,7 +83,7 @@ router.post('login', async(req, res) =>{
     }
     // Check if user exists
     try{
-        const user = User.findOne({email}).lean()
+        const user = await User.findOneAndUpdate({email}, {is_online: true, last_login: Date.now()}).lean()
         if(!user){
             res.status(400).send({
                 status: "error",
@@ -118,13 +118,42 @@ router.post('logout', async(req,res)=>{
     //verify token
     try{
         const user = jwt.verify(token, process.env.JWT_SECRET)
+
+        await User.findOneAndUpdate({_id: user._id}, {is_online: false, last_logout: Date.now()}).lean()
+
         res.status(200).send({status:"Successful", msg: "Logged out"})
     }catch(e){
-        if(e.name === 'JsonWebTokenError')
+        if(e.name === 'JsonWebTokenError'){
         console.log(e)
-        return res.status(500).send({status: 'error', msg:'Token verification failed', e})
-
+        return res.status(500).send({status: 'error', msg:'Token verification failed', error : e})
+}
     return res.status(401).send({status: "error", msg:"An error occured"})
+    }
+})
+
+//endpoint to delete user
+router.post('delete_user', async(req, res)=>{
+    const{token, user_id} = req.body
+
+    if(!token || user_id)
+        return res.status(400).send({status:'error', msg:'All fields must be filled'})
+
+    try {
+        //verify token
+         jwt.verify(token, process.env.JWT_SECRET)
+
+        //update user document
+        await User.findOneAndUpdate({_id: user_id}, {is_deleted: true}).lean()
+
+        res.status(200).send({status:'ok', msg:'Successfully Deleted'})
+        
+    } catch (e) {
+        if(e.name === 'JsonWebTokenError'){
+            console.log(e)
+            res.status(401).send({status:'error', msg:'Token verification failed', error: e})
+        }
+        return res.status(500).send({status:'error', msg:'An error occured'})
+        
     }
 })
 

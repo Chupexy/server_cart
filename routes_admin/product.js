@@ -31,7 +31,7 @@ router.post('/add_product', async (req, res) => {
         product.img_id = "a";
         product.img_url = "a";
         product.posted_by = admin.email
-        product.is_deleated = false
+        product.is_deleted = false
         product.timestamp = Date.now()
         
         await product.save()
@@ -237,10 +237,10 @@ router.post('delete_product', async(req, res) =>{
 
     try {
         //verify token
-        jwt.verify(token, process.env.JWT_SECRET)
+         jwt.verify(token, process.env.JWT_SECRET)
 
         //update product document
-        const product = await Product.findByIdAndUpdate({_id: product_id}, {is_deleated: true}, {new: true}).lean();
+        await Product.findByIdAndUpdate({_id: product_id}, {is_deleted: true}, {new: true}).lean();
 
         res.status(200).send({status: 'ok', msg:'Deleted successfully'})
 
