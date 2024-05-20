@@ -12,7 +12,7 @@ const router = express.Router()
 
 
 // Endpoint to signup
-router.post("signup", async(req, res) =>{
+router.post('/signup', async(req, res) =>{
     const {fullname, email, phone_no, password} = req.body
 
     // Check if all fields are filled
@@ -71,7 +71,7 @@ router.post("signup", async(req, res) =>{
 })
 
 // Endpoint to login
-router.post('login', async(req, res) =>{
+router.post('/login', async(req, res) =>{
     const { email, password} = req.body
 
     // Check if all fields are filled
@@ -109,7 +109,7 @@ router.post('login', async(req, res) =>{
 })
 
 //Endpoint to logout
-router.post('logout', async(req,res)=>{
+router.post('/logout', async(req,res)=>{
     const{ token } = req.body
 //check if fields are passed
     if(!token)
@@ -132,7 +132,7 @@ router.post('logout', async(req,res)=>{
 })
 
 //endpoint to delete user
-router.post('delete_user', async(req, res)=>{
+router.post('/delete_user', async(req, res)=>{
     const{token, user_id} = req.body
 
     if(!token || user_id)

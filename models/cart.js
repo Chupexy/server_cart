@@ -16,9 +16,7 @@ const cartSchema = new Schema({
     }],
     timestamp: Number
     
-},{
-collation : 'carts'
-})
+},{collection : 'carts'})
 
 
 const model = mongoose.model('Cart', cartSchema)

@@ -16,9 +16,7 @@ const productSchema = new Schema({
     vendor_name: String,
     vendor_img: String,
     vendor_id: String
-},{
-collation : 'products'
-})
+},{collection : 'products'})
 
-const model = mongoose.model('Products', productSchema)
+const model = mongoose.model('Product', productSchema)
 module.exports = model

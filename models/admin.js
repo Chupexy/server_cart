@@ -14,9 +14,7 @@ const adminSchema = new Schema({
     is_online: {type: Boolean, default: false},
     is_deleted: {type: Boolean, default: false}
 
-},{
-collation : 'admins'
-});
+},{collection : 'admins'});
 
 const model = mongoose.model('Admin', adminSchema);
 module.exports = model

@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv")
 const mongoose = require('mongoose');
 
+const app = express();
 dotenv.config()
 
 mongoose.connect(process.env.MONGO_URI)
@@ -15,7 +16,7 @@ con.on('open', error =>{
 })
 
 
-const app = express();
+
 app.use(express.json());
 app.use(express.urlencoded({extended: true}))
 

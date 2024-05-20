@@ -23,9 +23,7 @@ last_login: Number,
 last_logout: Number,
 is_online: {type: Boolean, default: false},
 is_deleted: {type: Boolean, default: false}
-},{
-collation: 'users'
-})
+},{collection: 'users'})
 
-const model= mongoose.model('Users', userSchema);
+const model= mongoose.model('User', userSchema);
 module.exports = model;
