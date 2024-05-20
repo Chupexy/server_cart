@@ -14,7 +14,7 @@ router.post('/edit_profile', async(req,res)=>{
 
     //check if fields are passed
     if(!token)
-    res.status(404).send({status:"error", msg:"required fields must be filled"})
+    return res.status(404).send({status:"error", msg:"required fields must be filled"})
 
     try{
         // verify token
@@ -32,11 +32,14 @@ router.post('/edit_profile', async(req,res)=>{
         }, {new: true}
     ).lean()
 
-    res.status(200).send({status: 'Successful', msg: 'Successfully updated user', user: Muser})
+    return res.status(200).send({status: 'Successful', msg: 'Successfully updated user', Muser})
   
     }catch(e){
-        res.status(400).send({status: 'error', msg:'An error occured'})
-    }
+        if(e.name === 'JsonWebTokenError'){
+        console.log(error)
+        return res.status(401).send({status: 'error', msg: 'Token Verification Failed'})
+}
+      return res.status(500).send({status: 'error', msg: 'An error occured'}) }
 })
 
 
@@ -46,7 +49,7 @@ router.post('/change_password', async(req, res)=>{
 
     //check if fields are passed correctly
     if(!token || !old_password || !new_password || !confirm_new_password){
-        res.status(400).send({status: 'error', msg: 'all fields must be filled'})
+       return res.status(400).send({status: 'error', msg: 'all fields must be filled'})
     }
 
     // get user document and change password
@@ -63,22 +66,25 @@ router.post('/change_password', async(req, res)=>{
                 password: updatepassword
             }).lean()
 
-            res.status(200).send({status: 'successful', msg: 'Password successfully changed'})
+            return res.status(200).send({status: 'successful', msg: 'Password successfully changed'})
         }
         }
        
-        res.status(400).send({status: 'error', msg: 'new password fields dont match'})
+        return res.status(400).send({status: 'error', msg: 'new password fields dont match'})
     } catch (error) {
-        res.status(400).send({status: 'error', msg: 'An error occured', error})
-    }
+        if(error.name === 'JsonWebTokenError'){
+        console.log(error)
+        return res.status(401).send({status: 'error', msg: 'Token Verification Failed'})
+}
+      return res.status(500).send({status: 'error', msg: 'An error occured'})}
 })
 
 //endpoint to view profile
-router.post('/view_proile', async(req, res) =>{
+router.post('/view_profile', async(req, res) =>{
     const {token }= req.body;
 
     if(!token)
-    res.status(400).send({status: 'error', msg: 'all fields must be filled'})
+    return res.status(400).send({status: 'error', msg: 'all fields must be filled'})
 
     try {
         // verify token
@@ -87,12 +93,12 @@ router.post('/view_proile', async(req, res) =>{
         // get user document
         const Muser = await User.findOne({_id : user._id}).lean(); 
         
-        res.status(200).send({status: 'ok', msg: 'successful', user: Muser })
+       return res.status(200).send({status: 'ok', msg: 'successful', user: Muser })
     } catch (error) {
-        if(error.name === 'JsonWebTokenError')
+        if(error.name === 'JsonWebTokenError'){
           console.log(error)
           return res.status(401).send({status: 'error', msg: 'Token Verification Failed'})
-
+}
         return res.status(500).send({status: 'error', msg: 'An error occured'})
     }
 })
@@ -109,14 +115,14 @@ router.post('/add_address', async(req, res) =>{
         const user = jwt.verify(token, process.env.JWT_SECRET)
 
         //Update document
-         let Muser = await User.findOneAndUpdate({_id: user_id},{ $push: {addresses: address}}, {new: true}).lean()
+         let Muser = await User.findOneAndUpdate({_id: user._id},{ $push: {addresses: address}}, {new: true}).lean()
 
          return res.status(200).send({status: 'ok', msg: 'Address added successfully'})
      } catch (e) {      
-        if(e.name === 'JsonWebTokenError')
+        if(e.name === 'JsonWebTokenError'){
         console.log(e)
         return res.status(401).send({status: 'error', msg:'Token Verification failed'})
-    
+        }
         return res.status(500).send({status: 'error', msg:'An error occured'})
      }
 })
@@ -133,7 +139,7 @@ router.post('add_cad', async(req, res) =>{
         let user = jwt.verify(token, process.env.JWT_SECRET)
 
 
-        res.status(200).send({status: 'ok', msg: 'Successful'})
+        return res.status(200).send({status: 'ok', msg: 'Successful'})
     } catch (e) {
         if(e.name === 'JsonWebTokenError'){
            console.log(e)  

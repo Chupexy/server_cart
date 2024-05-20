@@ -75,20 +75,14 @@ router.post('/login', async(req, res) =>{
     const { email, password} = req.body
 
     // Check if all fields are filled
-    if(!email || !password){
-        res.status(400).send({
-            status: "error",
-            msg: "All fields must be filled"
-        })
-    }
+    if(!email || !password)
+       return res.status(400).send({status: "error", msg: "All fields must be filled"})
+
     // Check if user exists
     try{
         const user = await User.findOneAndUpdate({email}, {is_online: true, last_login: Date.now()}).lean()
         if(!user){
-            res.status(400).send({
-                status: "error",
-                msg: "User not found"
-            })
+           return res.status(400).send({status: "error", msg: "User not found"})
         }
         // Compare password
         const confirm_password = await bcrypt.compare(password, user.password)
@@ -99,9 +93,9 @@ router.post('/login', async(req, res) =>{
                 id: user._id,
                 email: user.email,
             }, process.env.JWT_SECRET)
-            res.status(200).send({status: "Successful", msg: "User logged in successfully", user, token})
+            return res.status(200).send({status: "Successful", msg: "User logged in successfully", user, token})
         }
-        res.status(400).send({status: "Error", msg: "Incorrect Password"})
+        return res.status(400).send({status: "Error", msg: "Incorrect Password"})
 
     }catch(e){
         res.status(400).send({status: "error", msg: "An error occured"})
@@ -113,7 +107,7 @@ router.post('/logout', async(req,res)=>{
     const{ token } = req.body
 //check if fields are passed
     if(!token)
-    res.status(400).send({status: "error", msg: "all fields must be filled"})
+    return res.status(400).send({status: "error", msg: "all fields must be filled"})
 
     //verify token
     try{
@@ -121,7 +115,7 @@ router.post('/logout', async(req,res)=>{
 
         await User.findOneAndUpdate({_id: user._id}, {is_online: false, last_logout: Date.now()}).lean()
 
-        res.status(200).send({status:"Successful", msg: "Logged out"})
+        return res.status(200).send({status:"Successful", msg: "Logged out"})
     }catch(e){
         if(e.name === 'JsonWebTokenError'){
         console.log(e)
@@ -145,7 +139,7 @@ router.post('/delete_user', async(req, res)=>{
         //update user document
         await User.findOneAndUpdate({_id: user_id}, {is_deleted: true}).lean()
 
-        res.status(200).send({status:'ok', msg:'Successfully Deleted'})
+       return res.status(200).send({status:'ok', msg:'Successfully Deleted'})
         
     } catch (e) {
         if(e.name === 'JsonWebTokenError'){
