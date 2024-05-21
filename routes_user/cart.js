@@ -76,16 +76,16 @@ router.post('/delete_item', async(req, res) =>{
         const user = jwt.verify(token, process.env.JWT_SECRET)
 
         //remove from cart
-        const cart = await Cart.findOneAndUpdate({user_id: user._id}, {$pull: {items: {_id: item_id}}} , {$inc: {no_of_items: -1}}, {new: true}).lean()
+        const cart = await Cart.findOneAndUpdate({user_id: user._id}, {$pull: {order_items: {_id: item_id}}} , {$inc: {no_of_items: -1}}, {new: true}).lean()
 
-        res.status(200).send({status:'ok', msg:'Deleted successfully', cart})
+        return res.status(200).send({status:'ok', msg:'Deleted successfully', cart})
 
     } catch (e) {
         if(e.name === 'JsonWebTokenError'){
             console.log(e)
             return res.status(401).json({status: 'error', msg: "Token verification failed" })
         }
-        res.status(500).send({status:'error', msg:'An error occured', error: e})
+        return res.status(500).send({status:'error', msg:'An error occured', error: e})
     }
 
 })

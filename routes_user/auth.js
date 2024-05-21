@@ -54,14 +54,6 @@ router.post('/signup', async(req, res) =>{
 
          await cart.save();
 
-        const token = jwt.sign(
-            {
-            id: user._id,
-            email: user.email,  
-        }, 
-        process.env.JWT_SECRET
-    )
-
         res.status(200).send({status:"successful", msg: "User created successfully", user, token})
 
 
@@ -90,7 +82,7 @@ router.post('/login', async(req, res) =>{
         // If password is correct, generate token
         if(confirm_password){
             const token = jwt.sign({
-                id: user._id,
+                _id: user._id,
                 email: user.email,
             }, process.env.JWT_SECRET)
             return res.status(200).send({status: "Successful", msg: "User logged in successfully", user, token})

@@ -55,22 +55,23 @@ router.post('/change_password', async(req, res)=>{
     // get user document and change password
     try {
         const user = jwt.verify(token, process.env.JWT_SECRET)
-        const check = await bcrypt.compare(password, old_password)
+
+        let Muser = await User.findOne({_id: user._id}, {password : 1}).lean()
+
+        const check = await bcrypt.compare(old_password, Muser.password)
+
         if(check){
-             if(new_password === confirm_new_password){
-            const updatepassword = bcrypt.hash(confirm_new_password, 10)
-            let Muser = await User.findOne({_id: user._id}, {password : 1}).lean()
+            if(new_password !== confirm_new_password)
+                return res.status(400).send({status:'error', msg:'password missmatch'})
 
-            Muser = await User.findOneAndUpdate({_id: user_id},
-            {
-                password: updatepassword
-            }).lean()
+              const updatepassword = await bcrypt.hash(confirm_new_password, 10)
 
-            return res.status(200).send({status: 'successful', msg: 'Password successfully changed'})
+            Muser = await User.findOneAndUpdate({_id: user._id}, {password: updatepassword}).lean()
+
+        return res.status(200).send({status: 'successful', msg: 'Password successfully changed'})       
         }
-        }
-       
-        return res.status(400).send({status: 'error', msg: 'new password fields dont match'})
+         return res.status(400).send({status: 'error', msg: 'Old_password not correct'})
+   
     } catch (error) {
         if(error.name === 'JsonWebTokenError'){
         console.log(error)
@@ -89,6 +90,7 @@ router.post('/view_profile', async(req, res) =>{
     try {
         // verify token
         const user = jwt.verify(token, process.env.JWT_SECRET);
+        console.log(user)
     
         // get user document
         const Muser = await User.findOne({_id : user._id}).lean(); 
@@ -115,7 +117,7 @@ router.post('/add_address', async(req, res) =>{
         const user = jwt.verify(token, process.env.JWT_SECRET)
 
         //Update document
-         let Muser = await User.findOneAndUpdate({_id: user._id},{ $push: {addresses: address}}, {new: true}).lean()
+         await User.findOneAndUpdate({_id: user._id},{ $push: {addresses: address}}, {new: true}).lean()
 
          return res.status(200).send({status: 'ok', msg: 'Address added successfully'})
      } catch (e) {      

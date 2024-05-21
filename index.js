@@ -21,15 +21,16 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}))
 
 //admin routes
-app.use('admin_auth', require('./routes_admin/auth'))
-app.use('admin_profile', require('./routes_admin/profile'))
-app.use('admin_product', require('./routes_admin/product'))
+app.use('/admin_auth', require('./routes_admin/auth'))
+app.use('/admin_profile', require('./routes_admin/profile'))
+app.use('/admin_product', require('./routes_admin/product'))
 
 
 //user routes
 app.use('/user_auth', require('./routes_user/auth'))
 app.use('/user_profile', require('./routes_user/profile'))
-app.use('user_cart', require('./routes_user/cart'))
+app.use('/user_cart', require('./routes_user/cart'))
+app.use('/user_product', require('./routes_user/product'))
 
 
 app.listen(process.env.PORT, ()=>{

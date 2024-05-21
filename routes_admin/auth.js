@@ -13,7 +13,7 @@ dotenv.config()
 router.post('/signup', async(req, res)=>{
     const { fullname , email, password, role} = req.body
 
-    if(!fullname || !email || !password || role)
+    if(!fullname || !email || !password || !role)
         return res.status(400).send({statu: 'error', msg: 'All fields must be filled'});
 
     try {
@@ -24,40 +24,39 @@ router.post('/signup', async(req, res)=>{
 
         // encrypt password
         const Mpassword = await bcrypt.hash(password, 10);
+    
 
         // create admin document
         const timestamp = Date.now()
 
         const admin =  new Admin()
-            admin.fullname= fullname,
-            admin.email= email,
-            admin.password= Mpassword,
-            admin.role= role,
-            admin.img_id= img_id,
-            admin.img_url= img_url,
+            admin.fullname= fullname
+            admin.email= email
+            admin.password= Mpassword
+            admin.role= role
+            admin.img_id= ""
+            admin.img_url= ""
             admin.timestamp= timestamp
-        
-            await Admin.save()
+            
+            await admin.save()
+            
 
-        // generate token
-        const token = jwt.sign({
-            _id: admin._id,
-            email: admin.email
-        },
-        process.env.JWT_SECRET)
-
-        res.status(200).send({status: 'ok', msg: 'Admin created successfully', admin, token})
+        return res.status(200).send({status: 'ok', msg: 'Admin created successfully', admin})
         
 
     } catch (e) {
-        return res.status(401).send({status: 'error', msg: 'An error occured', e})
+        if(e.name === 'JsonWebTokenError'){
+            console.log(e)
+            return res.status(401).send({status:'error', msg:'Token verification failed', error: e})
+        }
+        return res.status(500).send({status:'error', msg:'An error occured'})
     }
 
  
 })
 
 // endpoint to login
-router.post('login', async(req, res) =>{
+router.post('/login', async(req, res) =>{
     const {email, password } = req.body
 
     if(!email || !password)
@@ -72,6 +71,7 @@ router.post('login', async(req, res) =>{
 
         // comapre password
         const compare_password = await bcrypt.compare(password, admin.password);
+
         if(!compare_password)
             return res.status(400).send({status:'error', msg:'password incorrect'});
 
@@ -81,10 +81,14 @@ router.post('login', async(req, res) =>{
             email: admin.email
         }, process.env.JWT_SECRET)
 
-        res.status(200).send({status: 'ok', msg: 'Login successful', admin, token})
+       return res.status(200).send({status: 'ok', msg: 'Login successful', admin, token})
         
     } catch (e) {
-        return res.status(401).send({status: 'error', msg: 'An error occured'})
+        if(e.name === 'JsonWebTokenError'){
+            console.log(e)
+            res.status(401).send({status:'error', msg:'Token verification failed', error: e})
+        }
+        return res.status(500).send({status:'error', msg:'An error occured'})
     }
 
 })

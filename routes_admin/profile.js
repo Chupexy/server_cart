@@ -47,34 +47,37 @@ router.post('/change_password', async(req, res)=>{
     if(!token || !old_password || !new_password || !confirm_new_password){
         res.status(400).send({status: 'error', msg: 'all fields must be filled'})
     }
+ // get user document and change password
+ try {
+    const admin = jwt.verify(token, process.env.JWT_SECRET)
 
-    // get user document and change password
-    try {
-        const admin = jwt.verify(token, process.env.JWT_SECRET)
+    let Madmin = await Admin.findOne({_id: admin._id}, {password : 1}).lean()
 
-        const Madmin = await Admin.findOne({_id: admin._id}, {password: 1}).lean()
+    const check = await bcrypt.compare(old_password, Madmin.password)
 
-        if( await bcrypt.compare(old_password, Madmin.password)){
-             if(new_password === confirm_new_password){
-            const updatepassword = await bcrypt.hash(confirm_new_password, 10)
+    if(check){
+        if(new_password !== confirm_new_password)
+            return res.status(400).send({status:'error', msg:'password missmatch'})
 
-            Madmin = await Admin.findOneAndUpdate({_id: admin_id},
-            {
-                password: updatepassword
-            }).lean()
+          const updatepassword = await bcrypt.hash(confirm_new_password, 10)
 
-            res.status(200).send({status: 'successful', msg: 'Password successfully changed'})
-        }
-        }
-       
-        res.status(400).send({status: 'error', msg: 'new password fields dont match'})
-    } catch (error) {
-        res.status(400).send({status: 'error', msg: 'An error occured', error})
+        Madmin = await Admin.findOneAndUpdate({_id: admin._id}, {password: updatepassword}).lean()
+
+    return res.status(200).send({status: 'successful', msg: 'Password successfully changed'})       
     }
+     return res.status(400).send({status: 'error', msg: 'Old_password not correct'})
+    } catch (error) {
+        if(error.name === 'JsonWebTokenError'){
+            console.log(error)
+            return res.status(401).send({status: 'error', msg: 'Token Verification Failed'})}
+  
+          return res.status(500).send({status: 'error', msg: 'An error occured'})
+      }
+    
 })
 
 //endpoint to view profile
-router.post('/view_proile', async(req, res) =>{
+router.post('/view_profile', async(req, res) =>{
     const {token }= req.body;
 
     if(!token)
@@ -89,9 +92,9 @@ router.post('/view_proile', async(req, res) =>{
         
         res.status(200).send({status: 'ok', msg: 'successful', admin: Madmin })
     } catch (error) {
-        if(error.name === 'JsonWebTokenError')
+        if(error.name === 'JsonWebTokenError'){
           console.log(error)
-          return res.status(401).send({status: 'error', msg: 'Token Verification Failed'})
+          return res.status(401).send({status: 'error', msg: 'Token Verification Failed'})}
 
         return res.status(500).send({status: 'error', msg: 'An error occured'})
     }

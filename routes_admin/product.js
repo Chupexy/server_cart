@@ -52,7 +52,7 @@ router.post('/add_product', async (req, res) => {
 router.post('/edit_product', async (req, res) => {
     const { token, product_id, product_name, price, description, brand, product_quantity, category } = req.body;
 
-    if(!token || !product_id || !product_name || !price || !description || !brand || !product_quantity || !category)
+    if(!token || !product_id )
         return res.status(400).send({status:'error', msg:'All fields must be filled'})
 
     try {
@@ -61,12 +61,12 @@ router.post('/edit_product', async (req, res) => {
 
         //get product document
         let product = await Product.findOne({_id: product_id}, {product_name: 1, price: 1, description: 1, brand: 1, product_quantity: 1, category: 1}).lean()
-        
+
         //update product document
         if(!product)
             return res.status(400).send({status: 'error', msg:'Product not found'})
 
-        product = Product.findByIdAndUpdate({_id: product_id}, {
+        product = await Product.findByIdAndUpdate({_id: product_id}, {
             product_name: product_name || product.product_name,
             price: price || product.price, 
             description: description || product.description,
@@ -75,19 +75,19 @@ router.post('/edit_product', async (req, res) => {
             category: category || product.category
             }, {new: true}).lean()
 
-            res.status(200).send({status: 'ok', msg:'Product updated successfully', product})
+           return res.status(200).send({status: 'ok', msg:'Product updated successfully', product})
     } catch (e){
         if(e.name === 'JsonWebTokenError'){
             console.log(e)
-            res.status(401).send({status:'error', msg:'Token verification failed', error: e})
+            return res.status(401).send({status:'error', msg:'Token verification failed', error: e})
         }
-        res.status(500).send({status:'error', msg:'An error occured'})
+        return res.status(500).send({status:'error', msg:'An error occured'})
         
     }
 })
 
 //endpoint to view single product
-router.post('view_product', async(req, res) =>{
+router.post('/view_product', async(req, res) =>{
     const { token, product_id } = req.body;
 
     if(!token || !product_id)
@@ -98,25 +98,25 @@ router.post('view_product', async(req, res) =>{
          jwt.verify(token, process.env.JWT_SECRET)
 
         //find product documeent
-        const product = await Product.findById({product_id}).lean()
+        const product = await Product.findById({_id: product_id}).lean()
 
         if(!product)
             return res.status(404).send({status: 'error', msg: 'Product not found'})
 
-        res.status(200).send({status:'ok', msg:'Product found', product})
+        return res.status(200).send({status:'ok', msg:'Product found', product})
         
     } catch (e) {
         if(e.name === 'JsonWebTokenError'){
             console.log(e)
             return res.status(401).send({status:'error', msg:'Token verification failed', error: e})
             }
-            res.status(500).send({status:'error', msg:'An error occured'})
+            return res.status(500).send({status:'error', msg:'An error occured'})
         
     }
 })
 
 // endpoint to view products
-router.post('view_products', async(req, res) =>{
+router.post('/view_products', async(req, res) =>{
     const { token } = req.body;
 
     if(!token)
@@ -141,10 +141,10 @@ router.post('view_products', async(req, res) =>{
 })
 
 //endpoint to add product categories
-router.post('add_product_category', async(req, res) =>{
+router.post('/add_product_category', async(req, res) =>{
     const { token, category_name } = req.body;
 
-    if(!token || !category)
+    if(!token || !category_name)
         return res.status(400).send({status: 'error', msg:'All fields must be filled'});
 
     try {
@@ -158,7 +158,7 @@ router.post('add_product_category', async(req, res) =>{
             $push : {categories: category_name}
         }, {new: true, upsert: true}).lean()
 
-        res.status(200).send({status: 'ok', msg:'Category successfully added ', categories: category.categories})
+        return res.status(200).send({status: 'ok', msg:'Category successfully added ', categories: category.categories})
 
         
     } catch (e) {
@@ -166,18 +166,18 @@ router.post('add_product_category', async(req, res) =>{
             console.log(e)
             return res.status(401).send({status:'error', msg:'Token verification failed', error: e})
         }
-        res.status(500).send({status:'error', msg:'An error occured'})
+        return res.status(500).send({status:'error', msg:'An error occured'})
         
     }
 
 })
 
 //endpoint to view categories
-router.post('view_categories', async(req, res) =>{
+router.post('/view_categories', async(req, res) =>{
     const {token } = req.body
     
     if(!token)
-        res.status(400).send({status:'error', msg:'All fields must be filled'});
+        return res.status(400).send({status:'error', msg:'All fields must be filled'});
 
     try {
         //verify token
@@ -188,7 +188,7 @@ router.post('view_categories', async(req, res) =>{
         if(!category)
             return res.status(200).send({status:'ok', msg: 'No categories at the moment'})
 
-        res.status(200).send({status:'ok', categories: category.categories})
+        return res.status(200).send({status:'ok', categories: category.categories})
         
     } catch (e){
         if(e.name === 'JsonWebTokenError'){
@@ -201,10 +201,10 @@ router.post('view_categories', async(req, res) =>{
 })
 
 //endpoint to search product
-router.post('search_product', async(req, res) =>{
+router.post('/search_product', async(req, res) =>{
     const {token, search_string } = req.body
     if(!token || !search_string)
-        res.status(400).send({status:'error', msg:'All fields must be filled'});
+        return res.status(400).send({status:'error', msg:'All fields must be filled'});
 
     try {
         //verify token
@@ -215,7 +215,7 @@ router.post('search_product', async(req, res) =>{
         if(!product)
             return res.status(200).send({status:'ok', msg: 'Product not found'})
 
-        res.status(200).send({status: 'ok', msg:'Successful', Product: product})
+        return res.status(200).send({status: 'ok', msg:'Successful', Product: product})
 
         
     } catch (e) {
@@ -223,17 +223,17 @@ router.post('search_product', async(req, res) =>{
             console.log(e)
             return res.status(401).send({status:'error', msg:'Token verification failed', error: e})
             }
-            res.status(500).send({status:'error', msg:'An error occured'})
+           return res.status(500).send({status:'error', msg:'An error occured'})
         
     }
 })
 
 //Endpoint to delete product
-router.post('delete_product', async(req, res) =>{
+router.post('/delete_product', async(req, res) =>{
     const {token, product_id} = req.body
 
     if(!token || !product_id)
-        res.status(400).send({status:'error', msg:'All fields must be filled'});
+        return res.status(400).send({status:'error', msg:'All fields must be filled'});
 
     try {
         //verify token
@@ -242,14 +242,14 @@ router.post('delete_product', async(req, res) =>{
         //update product document
         await Product.findByIdAndUpdate({_id: product_id}, {is_deleted: true}, {new: true}).lean();
 
-        res.status(200).send({status: 'ok', msg:'Deleted successfully'})
+        return res.status(200).send({status: 'ok', msg:'Deleted successfully'})
 
     } catch (e) {
         if(e.name === 'JsonWebTokenError'){
             console.log(e)
             return res.status(401).send({status:'error', msg:'Token verification failed', error: e})
             }
-            res.status(500).send({status:'error', msg:'An error occured'})
+            return res.status(500).send({status:'error', msg:'An error occured'})
     }
 })
 
