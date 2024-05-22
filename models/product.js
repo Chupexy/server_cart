@@ -23,8 +23,6 @@ const productSchema = new Schema({
     product_quantity: {type: Number, default: 0},
     is_deleted: {type: Boolean, default: false},
     posted_by: String,
-    vendor_name: String,
-    vendor_img: String,
     vendor_id: String,
 },{collection : 'products'})
 

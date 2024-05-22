@@ -6,6 +6,7 @@ const User = require('../models/user')
 const Admin= require('../models/admin')
 const Order = require('../models/order')
 const Product = require('../models/product')
+const Notification = require('../models/notification')
 
 const router = express.Router()
 
@@ -49,7 +50,7 @@ router.post('/view_orders', async(req, res) =>{
         const order = await Order.find({ }, {order_status: "pending"}).lean()
         if(order.length === 0)
             return res.status(200).send({status:'ok', msg:'no pending orders found'})
-        
+
         return res.status(200).send({status:'ok', msg:'Successful', order, count : order.length})
     } catch (e) {
         if(e.name === 'JsonWebTokenError'){

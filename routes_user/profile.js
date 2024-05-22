@@ -3,6 +3,7 @@ const User = require('../models/user')
 const jwt= require('jsonwebtoken')
 const dotenv = require('dotenv')
 const bcrypt = require('bcryptjs')
+const { encryptObject, decryptObject } = require('../encrypt')
 
 
 const router = express.Router()
@@ -140,8 +141,41 @@ router.post('add_cad', async(req, res) =>{
     try {
         let user = jwt.verify(token, process.env.JWT_SECRET)
 
+        // fetch initial user card details and decrypt it if any
+    const userM = await User.findById({ _id: user._id }, { card_details: 1 }).lean();
+    if (userM.card_details) {
+      // decrypt card details
+      let decrypted_card_details = decryptObject(userM.card_details, process.env.CART_DIGITS);
+      decrypted_card_details.push(card_details);
 
-        return res.status(200).send({status: 'ok', msg: 'Successful'})
+      // encrypt card details and update the user document
+      const encrypted_card_details = encryptObject(decrypted_card_details, process.env.CART_DIGITS);
+      await User.updateOne({ _id: user._id }, { card_details: encrypted_card_details });
+
+      // create notification document
+      let notification = new Notification();
+      notification.event = "Add card";
+      notification.event_id = "Cart";
+      notification.message = "New card added to payment method";
+      notification.timestamp = Date.now();
+      notification.receiver_id = user._id;
+      notification.sender_id = "Cart";
+
+      await notification.save();
+
+      // notify user that his order has been accepted
+      //setTimeout(handleNotification, 1000, user._id, '', process.env.FOODKART_LOGO, process.env.APP_NAME, "Payment", notification);
+
+      return res.status(200).send({ status: "ok", msg: "success", card_details: decrypted_card_details });
+    }
+
+    // encrypt card details and update the user document
+    const encrypted_card_details = encryptObject([card_details], process.env.CART_DIGITS);
+
+    await User.updateOne({ _id: user._id }, { card_details: encrypted_card_details });
+
+    return res.status(200).send({ status: "ok", msg: "success", card_details: [card_details] });
+
     } catch (e) {
         if(e.name === 'JsonWebTokenError'){
            console.log(e)  

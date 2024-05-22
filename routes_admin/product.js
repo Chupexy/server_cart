@@ -32,6 +32,7 @@ router.post('/add_product', async (req, res) => {
         product.img_url = "a";
         product.posted_by = admin.email
         product.is_deleted = false
+        product.vendor_id = admin._id
         product.timestamp = Date.now()
         
         await product.save()

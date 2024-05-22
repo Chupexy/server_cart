@@ -3,9 +3,10 @@ const jwt = require('jsonwebtoken')
 
 
 const User = require('../models/user')
-const Admin= require('../models/admin')
+//const Admin= require('../models/admin')
 const Order = require('../models/order')
 const Product = require('../models/product')
+const Notification = require('../models/notification')
 
 const router = express.Router()
 
@@ -31,8 +32,8 @@ router.post("/place_order", async (req, res) => {
           return res.status(400).send({ status: "error", msg: "all fields must be filled" });
 
         //fetch needed fields from order document
-        const {vendor_name, vendor_img, vendor_id, posted_by, rating, category, no_of_orders} = await Product.findById({_id: orders[i].product_id}, {
-          vendor_name: 1, vendor_img: 1, vendor_id: 1, posted_by: 1, rating: 1, category: 1, no_of_orders: 1
+        const {vendor_id, posted_by, rating, category, no_of_orders} = await Product.findById({_id: orders[i].product_id}, {
+           vendor_id: 1, posted_by: 1, rating: 1, category: 1, no_of_orders: 1
         }).lean()
 
         //create and populate document
@@ -49,10 +50,8 @@ router.post("/place_order", async (req, res) => {
         order.day = orders[i].day;
         order.month = orders[i].month;
         order.year = orders[i].year;
-        order.vendor_name = vendor_name;
-        order.vendor_img = vendor_img;
-        order.vendor_id = vendor_id;
         order.posted_by = posted_by;
+        order.vendor_id = vendor_id
         order.rating = rating;
         order.no_of_orders = no_of_orders;
         order.timestamp = timestamp;
@@ -60,19 +59,19 @@ router.post("/place_order", async (req, res) => {
         await order.save()
         MOrders.push(order);
 
-        // send notification to vendor
-      /*let notification = new Notification();
-      notification.event = `New order received: ${order.dish}`;
+        // send notification to admin
+      let notification = new Notification();
+      notification.event = `New order received: ${order.product}`;
       notification.event_id = order._id;
-      notification.message = `A new order has been placed for ${order.dish}`;
+      notification.message = `A new order has been placed for ${order.product}`;
       notification.timestamp = timestamp;
       notification.receiver_id = order.vendor_id;
       notification.sender_id = user._id;
 
       await notification.save();
 
-      setTimeout(handleNotification, 1000, order.vendor_id, '', process.env.FOODKART_LOGO, process.env.APP_NAME, `New order received: "${order.dish}"`, notification);
-      */
+      //setTimeout(handleNotification, 1000, order.vendor_id, '', process.env.FOODKART_LOGO, process.env.APP_NAME, `New order received: "${order.dish}"`, notification);
+      
       }
        // update user document
        await User.updateOne({ _id: user._id }, {$push: {orders: MOrders._id}},{$inc: { no_of_orders: 1 }});
