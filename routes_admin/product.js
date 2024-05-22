@@ -99,7 +99,7 @@ router.post('/view_product', async(req, res) =>{
          jwt.verify(token, process.env.JWT_SECRET)
 
         //find product documeent
-        const product = await Product.findById({_id: product_id}).lean()
+        const product = await Product.findOne({_id: product_id, is_deleted: false}).lean()
 
         if(!product)
             return res.status(404).send({status: 'error', msg: 'Product not found'})
@@ -126,11 +126,11 @@ router.post('/view_products', async(req, res) =>{
     try {
         jwt.verify(token, process.env.JWT_SECRET)
 
-        const products = await Product.find({}).lean()
+        const products = await Product.find({is_deleted: false}).lean()
         if(products.length == 0)
             return res.status(400).send({status:'error', msg:'No product at the moment'});
 
-        res.status(200).send({status:'ok', msg:'Products found', products})
+        res.status(200).send({status:'ok', msg:'Products found', products, count: products.length})
     } catch (e) {
         if(e.name === 'JsonWebTokenError'){
             console.log(e)
@@ -211,7 +211,7 @@ router.post('/search_product', async(req, res) =>{
         //verify token
         jwt.verify(token, process.env.JWT_SECRET)
 
-        const product = await Product.findOne({product_name: search_string}).lean()
+        const product = await Product.findOne({product_name: search_string, is_deleted: false}).lean()
 
         if(!product)
             return res.status(200).send({status:'ok', msg: 'Product not found'})

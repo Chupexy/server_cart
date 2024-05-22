@@ -37,8 +37,8 @@ router.post('/edit_profile', async(req,res)=>{
   
     }catch(e){
         if(e.name === 'JsonWebTokenError'){
-        console.log(error)
-        return res.status(401).send({status: 'error', msg: 'Token Verification Failed'})
+        console.log(e)
+        return res.status(401).send({status: 'error', msg: 'Token Verification Failed', error: e})
 }
       return res.status(500).send({status: 'error', msg: 'An error occured'}) }
 })
@@ -76,7 +76,7 @@ router.post('/change_password', async(req, res)=>{
     } catch (error) {
         if(error.name === 'JsonWebTokenError'){
         console.log(error)
-        return res.status(401).send({status: 'error', msg: 'Token Verification Failed'})
+        return res.status(401).send({status: 'error', msg: 'Token Verification Failed', error: e})
 }
       return res.status(500).send({status: 'error', msg: 'An error occured'})}
 })
@@ -91,7 +91,6 @@ router.post('/view_profile', async(req, res) =>{
     try {
         // verify token
         const user = jwt.verify(token, process.env.JWT_SECRET);
-        console.log(user)
     
         // get user document
         const Muser = await User.findOne({_id : user._id}).lean(); 
@@ -100,7 +99,7 @@ router.post('/view_profile', async(req, res) =>{
     } catch (error) {
         if(error.name === 'JsonWebTokenError'){
           console.log(error)
-          return res.status(401).send({status: 'error', msg: 'Token Verification Failed'})
+          return res.status(401).send({status: 'error', msg: 'Token Verification Failed', error: e})
 }
         return res.status(500).send({status: 'error', msg: 'An error occured'})
     }
@@ -124,14 +123,14 @@ router.post('/add_address', async(req, res) =>{
      } catch (e) {      
         if(e.name === 'JsonWebTokenError'){
         console.log(e)
-        return res.status(401).send({status: 'error', msg:'Token Verification failed'})
+        return res.status(401).send({status: 'error', msg:'Token Verification failed', error: e})
         }
         return res.status(500).send({status: 'error', msg:'An error occured'})
      }
 })
 
 // endpoint to add card details
-router.post('add_cad', async(req, res) =>{
+router.post('/add_card', async(req, res) =>{
     const {token, card_details} = req.body;
 
     if(!token || !card_details){
@@ -179,7 +178,7 @@ router.post('add_cad', async(req, res) =>{
     } catch (e) {
         if(e.name === 'JsonWebTokenError'){
            console.log(e)  
-           return res.status(401).send({status: 'error', msg: 'Token verification failed'})
+           return res.status(401).send({status: 'error', msg: 'Token verification failed', error: e})
         }
         return res.status(500).send({status: 'error', msg: 'An error occured'})
     }

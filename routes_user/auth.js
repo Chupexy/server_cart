@@ -24,7 +24,7 @@ router.post('/signup', async(req, res) =>{
         // Check if user already exists
         const found = await User.findOne({email}, {email : 1}).lean()
         if(found){
-             res.status(400).send({status: "error", msg: "User already exists"})
+            return res.status(400).send({status: "error", msg: "User already exists"})
         }
 
 
@@ -54,7 +54,7 @@ router.post('/signup', async(req, res) =>{
 
          await cart.save();
 
-        res.status(200).send({status:"successful", msg: "User created successfully", user, token})
+    return res.status(200).send({status:"successful", msg: "User created successfully", user})
 
 
     }catch(e){
@@ -72,7 +72,7 @@ router.post('/login', async(req, res) =>{
 
     // Check if user exists
     try{
-        const user = await User.findOneAndUpdate({email}, {is_online: true, last_login: Date.now()}).lean()
+        const user = await User.findOneAndUpdate({email}, {is_online: true, last_login: Date.now()}, {new: true}).lean()
         if(!user){
            return res.status(400).send({status: "error", msg: "User not found"})
         }
@@ -105,7 +105,7 @@ router.post('/logout', async(req,res)=>{
     try{
         const user = jwt.verify(token, process.env.JWT_SECRET)
 
-        await User.findOneAndUpdate({_id: user._id}, {is_online: false, last_logout: Date.now()}).lean()
+        await User.findOneAndUpdate({_id: user._id}, {is_online: false, last_logout: Date.now()}, {new: true}).lean()
 
         return res.status(200).send({status:"Successful", msg: "Logged out"})
     }catch(e){
