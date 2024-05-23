@@ -7,7 +7,7 @@ const orderSchema =  new Schema({
     user_phone_no: String,
     user_img: String,
     user_address: String,
-    product: String,
+    product_name: String,
     category: String,
     product_id: String,
     total_order_cost: Number, // total order price
@@ -23,10 +23,14 @@ const orderSchema =  new Schema({
     day: Number,
     month: Number,
     year: Number,
-    time: String,
     timestamp: Number,
-    order_status: {type: String, default: "pending"}
-    
+    order_status: {type: String, default: "pending"},
+    posted_by: String,
+    product_rating: {type : Number, default: 0},
+    vendor_id: String,
+    product_no_of_orders: {type: Number, default: 0}
+
+   
 },
 {collection: 'orders'})
 

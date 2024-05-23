@@ -24,21 +24,25 @@ router.post("/place_order", async (req, res) => {
   
       const MOrders = [];
       const timestamp = Date.now();
+      console.log("7")
   
       // create order document 
       for (let i = 0; i < orders.length; i++) {
         //check for required field
-        if(!orders[i].product || !orders[i].user_fullname || !orders[i].product_id || !orders[i].total_order_cost || !orders[i].img_url || !orders[i].price || !orders[i].quantity || !orders[i].order_instructions || !orders[i].day || !orders[i].month || !orders[i].year)
+        if(!orders[i].product_name || !orders[i].user_fullname || !orders[i].product_id || !orders[i].total_order_cost || !orders[i].img_url || !orders[i].price || !orders[i].quantity || !orders[i].order_instructions || !orders[i].day || !orders[i].month || !orders[i].year)
           return res.status(400).send({ status: "error", msg: "all fields must be filled" });
+        console.log('6')
 
         //fetch needed fields from order document
         const {vendor_id, posted_by, rating, category, no_of_orders} = await Product.findById({_id: orders[i].product_id}, {
            vendor_id: 1, posted_by: 1, rating: 1, category: 1, no_of_orders: 1
         }).lean()
 
+
         //create and populate document
         const order = new Order();
-        order.product = orders[i].product;
+        console.log("4")
+        order.product_name = orders[i].product_name;
         order.user_fullname = orders[i].user_fullname;
         order.category = category;
         order.product_id = orders[i].product_id;
@@ -52,11 +56,14 @@ router.post("/place_order", async (req, res) => {
         order.year = orders[i].year;
         order.posted_by = posted_by;
         order.vendor_id = vendor_id
-        order.rating = rating;
-        order.no_of_orders = no_of_orders;
+        order.product_rating = rating;
+        order.product_no_of_orders = no_of_orders;
+        console.log("2")
         order.timestamp = timestamp;
+        console.log("1")
 
         await order.save()
+        console.log(order)
         MOrders.push(order);
 
         // send notification to admin

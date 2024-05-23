@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Admin = require('../models/admin')
 const dotenv = require('dotenv')
+const {sendOTP, sendPasswordReset} = require("../utils/nodemailer");
 
 
 const router = express.Router()
@@ -138,13 +139,13 @@ router.post('/forgot_password', async (req, res) => {
   
     try {
         // Add Regex for email check
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if(!regex.test(String(email).toLocaleLowerCase())){
-            return res.status(400).json({status: 'error', msg: 'Please enter a valid email'});
-        }
+        // const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        // if(!regex.test(String(email).toLocaleLowerCase())){
+        //     return res.status(400).json({status: 'error', msg: 'Please enter a valid email'});
+        // }
     
-        // check if the user exists
-        const found = await User.findOne({email}, {fullname: 1, email: 1}).lean();
+        // check if the admin exists
+        const found = await Admin.findOne({email}, {fullname: 1, email: 1}).lean();
     
         if(!found){
             return res.status(400).send({status: 'error', msg: 'There is no user account with this email'});
@@ -267,7 +268,7 @@ router.post('/forgot_password', async (req, res) => {
                   <h6 style="display: flex; align-items: center; justify-content: center; font-weight: 200;">Enter the new phone number
                       you want to use in recovering your account</h6>    
           
-              <form action="https://server-foodkart.onrender.com/user_auth/reset_password" method="post">
+              <form action="http://localhost:3000/admin_profile/reset_password" method="post">
                   <div class="imgcontainer">
                   </div>
                   <div class="container">
@@ -318,7 +319,7 @@ router.post('/forgot_password', async (req, res) => {
       const password = await bcrypt.hash(new_password, 10)
   
       // update the phone_no field
-      await User.updateOne(
+      await Admin.updateOne(
         { email: data.email },
         {
           $set: { password },

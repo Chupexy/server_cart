@@ -76,7 +76,15 @@ router.post('/delete_item', async(req, res) =>{
         const user = jwt.verify(token, process.env.JWT_SECRET)
 
         //remove from cart
-        const cart = await Cart.findOneAndUpdate({user_id: user._id}, {$pull: {order_items: {_id: item_id}}} , {$inc: {no_of_items: -1}}, {new: true}).lean()
+        const cart = await Cart.findOneAndUpdate({user_id: user._id}, {$pull: {order_items: {_id: item_id}}, no_of_items: -1 },{ new: true}).lean()
+        // const cart = await Cart.findOne({user_id: user._id}).lean()
+        // let remaining_items = cart.order_items.filter((item) => item._id !== item_id)
+        //  cart.order_items = remaining_items
+        //  cart.no_of_items = remaining_items.length; 
+
+        //   cart.save((error) => {
+        //     if (error) 
+        //       console.error(error);})
 
         return res.status(200).send({status:'ok', msg:'Deleted successfully', cart})
 
