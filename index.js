@@ -25,7 +25,7 @@ app.use('/admin_auth', require('./routes_admin/auth'))
 app.use('/admin_profile', require('./routes_admin/profile'))
 app.use('/admin_product', require('./routes_admin/product'))
 app.use('/admin_order', require('./routes_admin/order'))
-//app.use('/admin_review', require('./routes_admin/review'))
+app.use('/admin_review', require('./routes_admin/review'))
 
 
 //user routes
@@ -34,7 +34,7 @@ app.use('/user_profile', require('./routes_user/profile'))
 app.use('/user_cart', require('./routes_user/cart'))
 app.use('/user_product', require('./routes_user/product'))
 app.use('/user_order', require('./routes_user/order'))
-app.use('user_review', require('./routes_user/review'))
+app.use('/user_review', require('./routes_user/review'))
 
 
 app.listen(process.env.PORT, ()=>{

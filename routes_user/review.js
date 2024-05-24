@@ -53,4 +53,28 @@ router.post('/create_review', async (req, res) =>{
     }
 })
 
+//endpoint to view product reviews
+router.post('/view_product_reviews', async(req, res)=>{
+  const {token, product_id} = req.body
+  if(!product_id || !token)
+      return res.status(400).send({status: 'error' , msg: 'All fields must be filled'})
+  try{
+     const user= jwt.verify(token, process.env.JWT_SECRET)
+
+
+      const reviews = await Review.find({user_id: user._id, product_id : product_id})
+
+      if(reviews.length == 0)
+          return res.status(200).send({status: 'ok' , msg: 'No reviews at the moment'})
+
+      return res.status(200).send({status: 'ok' , msg: 'Success', reviews: reviews, count: reviews.length})
+      }catch(e){
+        if(e.name == 'JsonWebTokenError'){
+          console.log(e)
+          return res.status(401).send({status: 'error' , msg: 'Token verification error'})
+        }
+          return res.status(500).send({status: 'error' , msg: 'An error occured', error: e})
+          }
+})
+
 module.exports = router;

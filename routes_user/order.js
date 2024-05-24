@@ -60,9 +60,17 @@ router.post("/place_order", async (req, res) => {
         order.product_no_of_orders = no_of_orders;
         console.log("2")
         order.timestamp = timestamp;
-        console.log("1")
+        console.log(order.timestamp)
 
-        await order.save()
+
+
+        await order.save((error) => {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('Order saved');
+  }
+})
         console.log(order)
         MOrders.push(order);
 
